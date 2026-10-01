@@ -1,0 +1,5 @@
+import React, {useEffect,useState} from "react";
+import { packages as defaultPackages } from "../data/travelData";
+import PackageCard from "../components/PackageCard";
+import { getGuidePackages, fetchGuidePackages } from "../utils";
+export default function UserPackages(){const [guidePackages,setGuidePackages]=useState([]);useEffect(()=>{const f=async()=>setGuidePackages(await fetchGuidePackages());f();window.addEventListener("stg-data-change",f);const t=setInterval(f,5000);window.addEventListener("focus",f);return()=>{window.removeEventListener("stg-data-change",f);window.removeEventListener("focus",f);clearInterval(t)}},[]);const all=[...guidePackages,...defaultPackages];return <main className="inner-page"><div className="inner-header"><span className="eyebrow">Plan your journey</span><h1>Packages</h1><p>All available packages are shown together, whether created by Smart Travel Guide or a Local Guide.</p></div><div className="package-grid">{all.map(x=><PackageCard item={x} key={`${x.guideEmail||"smart"}-${x.id}`}/>)}</div>{!all.length&&<div className="empty-state">No packages are available right now.</div>}</main>}
