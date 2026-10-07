@@ -1,1 +1,74 @@
-[]
+[
+  {
+    "id": "b0658ff7-fb76-4d1d-a678-41afbc60d1b7",
+    "recipientEmail": "saibhargavi1350@gmail.com",
+    "type": "guide_accepted",
+    "requestId": "00de2329-b859-474a-92e1-26053f4433bf",
+    "bookingId": "00de2329-b859-474a-92e1-26053f4433bf",
+    "message": "sai accepted your Guide/Travel System request for Agra.",
+    "read": true,
+    "createdAt": "2026-10-07T04:17:20.177Z"
+  },
+  {
+    "id": "8d7e5aac-d229-4fef-8144-769e0f7a785e",
+    "recipientEmail": "sai@gmail.com",
+    "type": "guide_request",
+    "requestId": "00de2329-b859-474a-92e1-26053f4433bf",
+    "bookingId": "00de2329-b859-474a-92e1-26053f4433bf",
+    "message": "Sai Bhargavi sent a Guide/Travel System request for Agra. Open My Bookings to review it.",
+    "read": false,
+    "createdAt": "2026-10-07T04:17:04.401Z"
+  },
+  {
+    "id": "e4f33efb-bf92-4d6f-92b6-022e5b9322d0",
+    "recipientEmail": "sai@gmail.com",
+    "type": "place_verification",
+    "message": "Your place submission \"Agra\" is now Approved.",
+    "read": false,
+    "createdAt": "2026-10-07T04:08:20.950Z"
+  },
+  {
+    "id": "0231b4ac-1721-4f44-a07f-89b804e081d8",
+    "recipientEmail": "sai@gmail.com",
+    "type": "admin_verification",
+    "message": "Your Local Guide account has been verified by STG Admin.",
+    "read": false,
+    "createdAt": "2026-10-07T04:08:09.929Z"
+  },
+  {
+    "id": "eaeb5aa2-9cef-4d3c-aabf-2e2f8c8b623c",
+    "recipientEmail": "raghavendrapamarthi07@gmail.com",
+    "type": "booking_confirmed",
+    "bookingId": "77045431-75bf-4d8b-92af-3c81b9b03141",
+    "message": "Your booking for \"Raghavendra\" is confirmed.",
+    "read": true,
+    "createdAt": "2026-10-01T10:23:27.471Z"
+  },
+  {
+    "id": "2d313801-cacf-461d-9187-7ee05d31e8df",
+    "recipientEmail": "raghavapamarthi07@gmail.com",
+    "type": "package_booking",
+    "bookingId": "77045431-75bf-4d8b-92af-3c81b9b03141",
+    "message": "Raghava booked your package \"Raghavendra\".",
+    "read": false,
+    "createdAt": "2026-10-01T10:23:27.471Z"
+  },
+  {
+    "id": "f5a06e3f-89d5-4ac0-962f-da2f8c8a9385",
+    "recipientEmail": "raghavapamarthi07@gmail.com",
+    "type": "guide_request",
+    "requestId": "df389bac-5612-43db-bff0-1dd21ea56f94",
+    "bookingId": "df389bac-5612-43db-bff0-1dd21ea56f94",
+    "message": "Raghava sent a Guide/Travel System request for Vijayawada. Open My Bookings to review it.",
+    "read": true,
+    "createdAt": "2026-10-01T10:15:50.936Z"
+  },
+  {
+    "id": "8aeb0119-632d-45c8-8362-9d36cd836043",
+    "recipientEmail": "raghavapamarthi07@gmail.com",
+    "type": "admin_verification",
+    "message": "Your Local Guide account has been verified by STG Admin.",
+    "read": false,
+    "createdAt": "2026-10-01T10:13:45.620Z"
+  }
+]
