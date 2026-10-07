@@ -19,6 +19,7 @@ import MyContributions from "./pages/MyContributions";
 import Roadmap from "./pages/Roadmap";
 import GuideDashboard from "./pages/GuideDashboard";
 import GuideRequests from "./pages/GuideRequests";
+import GuideBookings from "./pages/GuideBookings";
 import PlaceDetails from "./pages/PlaceDetails";
 import AdminLogin from "./pages/AdminLogin";
 import AdminPanel from "./pages/AdminPanel";
@@ -119,6 +120,7 @@ export default function App() {
       {/* Local Guide Pages (Protected with GuideLayout) */}
       <Route path="/guide" element={<Protected role="guide"><GuideLayout><GuideDashboard /></GuideLayout></Protected>} />
       <Route path="/guide/requests" element={<Protected role="guide"><GuideLayout><GuideRequests /></GuideLayout></Protected>} />
+      <Route path="/guide/bookings" element={<Protected role="guide"><GuideLayout><GuideBookings /></GuideLayout></Protected>} />
       <Route path="/guide/contributions" element={<Protected role="guide"><GuideLayout><MyContributions /></GuideLayout></Protected>} />
       <Route path="/guide/profile" element={<Protected role="guide"><GuideLayout><Profile /></GuideLayout></Protected>} />
 

@@ -430,13 +430,50 @@ html[data-stg-theme="light"] .stg-theme-toggle{color:#173e6c;background:#fff;bor
 html[data-stg-theme="light"] .story-navbar{background:rgba(6,22,63,.88)!important}
 html[data-stg-theme="light"] .story-navbar .brand strong,html[data-stg-theme="light"] .story-navbar .story-desktop-nav a{color:#fff!important}
 html[data-stg-theme="light"] .story-navbar .brand small{color:#d7def5!important}
-html[data-stg-theme="light"] .story-landing{background:#fff!important;color:#163a67!important}
-html[data-stg-theme="light"] .story-section,html[data-stg-theme="light"] .story-beginning,html[data-stg-theme="light"] .story-regions,html[data-stg-theme="light"] .story-guides,html[data-stg-theme="light"] .story-packages,html[data-stg-theme="light"] .story-trust,html[data-stg-theme="light"] .story-how{background:#fff!important;color:#163a67!important}
-html[data-stg-theme="light"] .story-copy h2,html[data-stg-theme="light"] .story-section-kicker,html[data-stg-theme="light"] .story-copy p,html[data-stg-theme="light"] .region-item strong,html[data-stg-theme="light"] .region-item small,html[data-stg-theme="light"] .guide-story-card strong,html[data-stg-theme="light"] .guide-story-card small,html[data-stg-theme="light"] .package-story-card strong,html[data-stg-theme="light"] .package-story-card small,html[data-stg-theme="light"] .package-story-card b,html[data-stg-theme="light"] .trust-list strong,html[data-stg-theme="light"] .trust-list small,html[data-stg-theme="light"] .journey-step strong,html[data-stg-theme="light"] .journey-step small{color:#163a67!important}
-html[data-stg-theme="light"] .story-photo-card{box-shadow:0 18px 35px rgba(19,55,95,.18)!important}
-html[data-stg-theme="light"] .story-footer{background:#f3f7fc!important;color:#163a67!important}
-html[data-stg-theme="light"] .story-footer a,html[data-stg-theme="light"] .story-footer span,html[data-stg-theme="light"] .story-footer small{color:#476585!important}
-html[data-stg-theme="light"] .story-footer strong,html[data-stg-theme="light"] .footer-brand strong{color:#163a67!important}
+html[data-stg-theme="light"] .story-landing{background:#f8fafc!important;color:#0f172a!important}
+html[data-stg-theme="light"] .story-hero{background:linear-gradient(90deg,rgba(255,255,255,.96) 0%,rgba(248,250,252,.90) 50%,rgba(241,245,249,.65) 100%),url('/assets/seated-lake-clean-hd.png') 65% center/cover no-repeat!important}
+html[data-stg-theme="light"] .story-kicker{background:#eff6ff!important;border-color:#bfdbfe!important;color:#1d4ed8!important}
+html[data-stg-theme="light"] .story-kicker i{color:#2563eb!important}
+html[data-stg-theme="light"] .story-hero h1{color:#0f172a!important}
+html[data-stg-theme="light"] .story-hero-accent{color:#1d4ed8!important;background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 100%)!important;-webkit-background-clip:text!important;background-clip:text!important;-webkit-text-fill-color:transparent!important}
+html[data-stg-theme="light"] .story-hero p{color:#475569!important}
+html[data-stg-theme="light"] .story-btn-ghost{background:#fff!important;color:#0f172a!important;border-color:#cbd5e1!important;box-shadow:0 1px 3px rgba(0,0,0,.05)!important}
+html[data-stg-theme="light"] .story-btn-ghost:hover{background:#f1f5f9!important;border-color:#94a3b8!important}
+html[data-stg-theme="light"] .story-hero-perks{border-top-color:#e2e8f0!important}
+html[data-stg-theme="light"] .story-hero-perks span{color:#64748b!important}
+html[data-stg-theme="light"] .story-scroll{color:#64748b!important}
+html[data-stg-theme="light"] .hero-feature-card{background:#fff!important;border-color:#e2e8f0!important;box-shadow:0 14px 35px rgba(15,23,42,.08)!important}
+html[data-stg-theme="light"] .hero-feature-body h3{color:#0f172a!important}
+html[data-stg-theme="light"] .hero-feature-body p{color:#64748b!important}
+html[data-stg-theme="light"] .hero-feature-guide strong{color:#0f172a!important}
+html[data-stg-theme="light"] .hero-feature-guide small{color:#64748b!important}
+html[data-stg-theme="light"] .hero-feature-price strong{color:#0284c7!important}
+html[data-stg-theme="light"] .hero-feature-footer{border-top-color:#f1f5f9!important}
+html[data-stg-theme="light"] .story-section{background:#fff!important}
+html[data-stg-theme="light"] .story-beginning,html[data-stg-theme="light"] .story-guides,html[data-stg-theme="light"] .story-trust{background:#f8fafc!important}
+html[data-stg-theme="light"] .story-section-kicker{color:#2563eb!important}
+html[data-stg-theme="light"] .story-copy h2,html[data-stg-theme="light"] .section-head-center h2{color:#0f172a!important}
+html[data-stg-theme="light"] .story-copy p,html[data-stg-theme="light"] .section-head-center p{color:#475569!important}
+html[data-stg-theme="light"] .destination-preview-card,html[data-stg-theme="light"] .region-item-card,html[data-stg-theme="light"] .guide-story-card,html[data-stg-theme="light"] .package-story-card,html[data-stg-theme="light"] .trust-item-card,html[data-stg-theme="light"] .journey-step-card{background:#fff!important;border-color:#e2e8f0!important;box-shadow:0 4px 16px rgba(15,23,42,.05)!important}
+html[data-stg-theme="light"] .destination-preview-card:hover,html[data-stg-theme="light"] .region-item-card:hover,html[data-stg-theme="light"] .guide-story-card:hover,html[data-stg-theme="light"] .package-story-card:hover,html[data-stg-theme="light"] .journey-step-card:hover{border-color:#93c5fd!important;box-shadow:0 10px 25px rgba(15,23,42,.08)!important}
+html[data-stg-theme="light"] .preview-card-header strong,html[data-stg-theme="light"] .region-card-info strong,html[data-stg-theme="light"] .guide-card-details strong,html[data-stg-theme="light"] .package-card-body strong,html[data-stg-theme="light"] .trust-card-text strong,html[data-stg-theme="light"] .journey-step-card strong{color:#0f172a!important}
+html[data-stg-theme="light"] .preview-card-footer,html[data-stg-theme="light"] .package-price-wrap{border-top-color:#f1f5f9!important}
+html[data-stg-theme="light"] .package-price-wrap b{color:#0284c7!important}
+html[data-stg-theme="light"] .trust-seal-card{background:#eff6ff!important;border-color:#bfdbfe!important}
+html[data-stg-theme="light"] .trust-seal-card strong{color:#1e3a8a!important}
+html[data-stg-theme="light"] .trust-seal-card small{color:#2563eb!important}
+html[data-stg-theme="light"] .journey-step-number{color:#94a3b8!important}
+html[data-stg-theme="light"] .story-final{background:linear-gradient(180deg,rgba(248,250,252,.94) 0%,rgba(241,245,249,.96) 100%),url('/assets/seated-lake-clean-hd.png') center/cover no-repeat!important}
+html[data-stg-theme="light"] .story-final-inner h2{color:#0f172a!important}
+html[data-stg-theme="light"] .story-final-inner p{color:#475569!important}
+html[data-stg-theme="light"] .story-footer{background:#f1f5f9!important;border-top-color:#e2e8f0!important;color:#64748b!important}
+html[data-stg-theme="light"] .story-footer a,html[data-stg-theme="light"] .story-footer span,html[data-stg-theme="light"] .story-footer small{color:#64748b!important}
+html[data-stg-theme="light"] .footer-brand strong,html[data-stg-theme="light"] .footer-col strong{color:#0f172a!important}
+html[data-stg-theme="light"] .footer-social a{background:#fff!important;border-color:#e2e8f0!important;color:#475569!important}
+html[data-stg-theme="light"] .footer-social a:hover{background:#2563eb!important;border-color:#2563eb!important;color:#fff!important}
+html[data-stg-theme="light"] .footer-copy{border-top-color:#e2e8f0!important;color:#94a3b8!important}
+html[data-stg-theme="light"] .story-regions:before,html[data-stg-theme="light"] .story-guides:before,html[data-stg-theme="light"] .story-packages:before,html[data-stg-theme="light"] .story-trust:before,html[data-stg-theme="light"] .story-how:before{background:#031a4b!important;box-shadow:none!important}
+
 
 html[data-stg-theme="light"] .user-page,html[data-stg-theme="light"] .search-page,html[data-stg-theme="light"] .my-trips-page,html[data-stg-theme="light"] .recommendation-page,html[data-stg-theme="light"] .place-details-page,html[data-stg-theme="light"] .suggest-place-page,html[data-stg-theme="light"] .guide-page,html[data-stg-theme="light"] .guide-profile-page,html[data-stg-theme="light"] .inner-page{color:#163a67!important;background:#fff!important}
 html[data-stg-theme="light"] .inner-header h1,html[data-stg-theme="light"] .inner-header p,html[data-stg-theme="light"] .section-heading h2,html[data-stg-theme="light"] .section-heading p{color:#163a67!important}
@@ -1308,3 +1345,14 @@ html[data-stg-theme="light"] .load-more-btn{
     white-space:nowrap;
   }
 }
+
+/* Final Traveller sidebar polish: keep the selected page at full brightness.
+   The sidebar remains visible, but its backdrop must not dim or blur the page. */
+.user-menu-backdrop {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  pointer-events: none !important;
+}
+html[data-stg-theme="light"] .guide-vehicle-signup-section{background:#f7f9ff!important;border-color:#d6e1ee!important}.guide-vehicle-signup-section h5{color:inherit}.guide-vehicle-signup-section p{color:#7a8fa8}.vehicle-signup-card{background:rgba(13,34,82,.5)}html[data-stg-theme="light"] .vehicle-signup-card{background:#fff!important;border-color:#d6e1ee!important}.vehicle-file-box{color:#e9efff}html[data-stg-theme="light"] .vehicle-file-box{background:#f7faff!important;color:#163a67!important;border-color:#a9bfd8!important}
+html[data-stg-theme="light"] .guide-package-vehicle-option,html[data-stg-theme="light"] .guide-booking-full-card,html[data-stg-theme="light"] .trip-bookings-section,html[data-stg-theme="light"] .trip-package-booking-card,html[data-stg-theme="light"] .profile-vehicle-card,html[data-stg-theme="light"] .profile-add-vehicle{background:#fff!important;border-color:#d6e1ee!important;color:#163a67!important}html[data-stg-theme="light"] .guide-package-vehicle-option small,html[data-stg-theme="light"] .guide-booking-full-head small,html[data-stg-theme="light"] .profile-vehicle-note{color:#6d829a!important}

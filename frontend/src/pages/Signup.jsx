@@ -4,10 +4,28 @@ import RoleSwitcher from "../components/RoleSwitcher";
 import BrandMark from "../components/BrandMark";
 import ThemeToggle from "../components/ThemeToggle";
 
+const INDIAN_STATES_AND_UTS = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
+  "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand",
+  "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur",
+  "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab",
+  "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura",
+  "Uttar Pradesh", "Uttarakhand", "West Bengal",
+  "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu",
+  "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry"
+];
+
+const GUIDE_LANGUAGES = [
+  "English", "Hindi", "Telugu", "Tamil", "Kannada", "Malayalam",
+  "Marathi", "Bengali", "Gujarati", "Punjabi", "Odia", "Assamese",
+  "Urdu", "Kashmiri", "Nepali", "Sanskrit", "Konkani", "Manipuri",
+  "Maithili", "Sindhi", "Bodo", "Dogri", "Santhali"
+];
+
 const initial = {
   name:"", email:"", phone:"", dob:"", age:"", gender:"", state:"", address:"", pincode:"",
-  travelTypes:[], budget:"", interests:"", guideBio:"", guideExpertise:"", languages:"", experience:"", qualification:"", additionalInterests:"",
-  areaInterests:[], identityProof:null, password:"", confirmPassword:"", terms:false
+  travelTypes:[], budget:"", interests:"", guideBio:"", guideExpertise:"", languages:[], experience:"", qualification:"", additionalInterests:"",
+  areaInterests:[], identityProof:null, vehiclesAvailable:"No", vehicleCount:"", vehicles:[], password:"", confirmPassword:"", terms:false
 };
 
 export default function Signup() {
@@ -18,6 +36,7 @@ export default function Signup() {
   const change=e=>setForm({...form,[e.target.name]:e.target.type==="checkbox"?e.target.checked:e.target.value});
   const toggleType=t=>setForm({...form,travelTypes:form.travelTypes.includes(t)?form.travelTypes.filter(x=>x!==t):[...form.travelTypes,t]});
   const toggleArea=t=>setForm({...form,areaInterests:form.areaInterests.includes(t)?form.areaInterests.filter(x=>x!==t):[...form.areaInterests,t]});
+  const toggleLanguage=language=>setForm(prev=>({...prev,languages:prev.languages.includes(language)?prev.languages.filter(x=>x!==language):[...prev.languages,language]}));
   const handleIdentityProof=e=>{
     const file=e.target.files?.[0];
     if(!file){ setForm({...form,identityProof:null}); return; }
@@ -28,13 +47,18 @@ export default function Signup() {
     reader.onload=()=>{ setError(""); setForm(prev=>({...prev,identityProof:{name:file.name,type:file.type,size:file.size,data:reader.result}})); };
     reader.readAsDataURL(file);
   };
+  const updateVehicle=(index,key,value)=>setForm(prev=>{const vehicles=[...prev.vehicles];vehicles[index]={...vehicles[index],[key]:value};return {...prev,vehicles}});
+  const addVehicle=()=>setForm(prev=>({...prev,vehicles:[...prev.vehicles,{type:"",customType:"",vehicleNumber:"",vehiclePhoto:null,drivingLicense:null}]}));
+  const removeVehicle=index=>setForm(prev=>({...prev,vehicles:prev.vehicles.filter((_,i)=>i!==index)}));
+  const readVehicleFile=(index,key,e)=>{const file=e.target.files?.[0];if(!file)return;if(file.size>8*1024*1024)return setError("Vehicle photo and driving license must be 8 MB or smaller.");const allowed=key==="vehiclePhoto"?["image/jpeg","image/png","image/webp"]:["application/pdf","image/jpeg","image/png","image/webp"];if(!allowed.includes(file.type))return setError(key==="vehiclePhoto"?"Vehicle photo must be JPG, PNG or WEBP.":"Driving license must be PDF, JPG, PNG or WEBP.");const r=new FileReader();r.onload=()=>{setError("");updateVehicle(index,key,{name:file.name,type:file.type,size:file.size,data:r.result});};r.readAsDataURL(file)};
+
   async function submit(e){
     e.preventDefault(); setError("");
     const requiredValue = key => String(form[key] ?? "").trim().length > 0;
-    const guideCommonRequired=["name","email","phone","age","gender","address","pincode","languages","password","confirmPassword"];
+    const guideCommonRequired=["name","email","phone","age","gender","state","address","pincode","password","confirmPassword"];
     const travellerRequired=["name","email","phone","age","gender","password","confirmPassword"];
     if(role === "guide") {
-      if(guideCommonRequired.some(k=>!requiredValue(k)) || !form.identityProof) return setError("Please complete all required local guide fields and upload your identity proof.");
+      if(guideCommonRequired.some(k=>!requiredValue(k)) || !Array.isArray(form.languages) || form.languages.length===0 || !form.identityProof) return setError("Please complete all required local guide fields and upload your identity proof.");
       if(!/^\d{1,3}$/.test(String(form.age)) || Number(form.age)<1 || Number(form.age)>120) return setError("Please enter a valid age.");
       if(!/^\d{6}$/.test(String(form.pincode))) return setError("Please enter a valid 6-digit pincode.");
       if(form.identityProof.size>8*1024*1024) return setError("Identity proof must be 8 MB or smaller.");
@@ -45,7 +69,7 @@ export default function Signup() {
     if(form.password!==form.confirmPassword) return setError("Passwords do not match.");
     if(form.password.length<8) return setError("Password must contain at least 8 characters.");
     try {
-      const payload={...form,role,identityProofData:form.identityProof?.data||null,identityProofName:form.identityProof?.name||"",identityProofType:form.identityProof?.type||"",identityProofSize:form.identityProof?.size||0};
+      const payload={...form,languages:Array.isArray(form.languages)?form.languages.join(", "):form.languages,role,identityProofData:form.identityProof?.data||null,identityProofName:form.identityProof?.name||"",identityProofType:form.identityProof?.type||"",identityProofSize:form.identityProof?.size||0};
       delete payload.identityProof;
       const response=await fetch("/api/signup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
       const data=await response.json();
@@ -72,31 +96,42 @@ export default function Signup() {
             <Field label="Email" name="email" type="email" value={form.email} onChange={change} required />
             <Field label="Phone Number" name="phone" value={form.phone} onChange={change} required />
             <Field label="Age" name="age" type="number" value={form.age} onChange={change} placeholder="Enter your age" min="1" max="120" required />
-            <div className="field"><label>Gender <em>*</em></label><div className="radio-row">{["Male","Female","Other","Prefer not to say"].map(g=><label key={g}><input type="radio" name="gender" value={g} checked={form.gender===g} onChange={change}/>{g}</label>)}</div></div>
+            <div className="field"><label>Gender <em>*</em></label><div className="radio-row">{["Male","Female"].map(g=><label key={g}><input type="radio" name="gender" value={g} checked={form.gender===g} onChange={change}/>{g}</label>)}</div></div>
           </div>
           <div className="form-grid">
+            <SelectField label="State" name="state" value={form.state} onChange={change} options={INDIAN_STATES_AND_UTS} placeholder="Select your state / UT" required />
             <Field label="Address" name="address" value={form.address} onChange={change} placeholder="Enter your complete address" required />
             <Field label="Pincode" name="pincode" value={form.pincode} onChange={change} placeholder="6-digit pincode" maxLength={6} required />
           </div>
           <h5>Local Guide Information</h5>
           <div className="form-grid">
             <Field label="Guide Experience" name="experience" value={form.experience} onChange={change} placeholder="e.g. 3 years" />
-            <Field label="Languages can speak" name="languages" value={form.languages} onChange={change} placeholder="English, Telugu, Hindi..." required />
+            <LanguageMultiSelect selected={form.languages} onToggle={toggleLanguage} options={GUIDE_LANGUAGES} required />
           </div>
           <Field label="Short Bio" name="guideBio" value={form.guideBio} onChange={change} placeholder="Briefly tell travellers about yourself and your local knowledge" />
           <div className="field guide-area-field">
             <label>Area interest in guiding</label>
             <div className="chips">{["Heritage & History","Nature & Wildlife","Beaches & Coastal","Adventure & Trekking","Culture & Food","Spiritual & Pilgrimage","Photography","Shopping & Local Markets","Family Tours","Eco Tourism"].map(t=><button type="button" className={form.areaInterests.includes(t)?"chip active":"chip"} onClick={()=>toggleArea(t)} key={t}>{t}</button>)}</div>
           </div>
+          <section className="guide-vehicle-signup-section">
+            <div className="guide-section-heading"><div><h5>Vehicle Availability</h5><p>Tell us whether you have vehicles available for guiding travellers.</p></div></div>
+            <div className="field"><label>Vehicles Available <em>*</em></label><div className="radio-row"><label><input type="radio" name="vehiclesAvailable" value="No" checked={form.vehiclesAvailable==="No"} onChange={e=>setForm(prev=>({...prev,vehiclesAvailable:"No",vehicleCount:"",vehicles:[]}))}/> No</label><label><input type="radio" name="vehiclesAvailable" value="Yes" checked={form.vehiclesAvailable==="Yes"} onChange={e=>setForm(prev=>({...prev,vehiclesAvailable:"Yes"}))}/> Yes</label></div></div>
+            {form.vehiclesAvailable==="Yes"&&<><div className="field"><label>How many vehicles? <em>*</em></label><input type="number" min="1" max="20" value={form.vehicleCount} onChange={e=>{const count=Math.max(0,Math.min(20,Number(e.target.value)||0));setForm(prev=>{const vehicles=Array.from({length:count},(_,i)=>prev.vehicles[i]||{type:"",customType:"",vehicleNumber:"",vehiclePhoto:null,drivingLicense:null});return {...prev,vehicleCount:e.target.value,vehicles}})}} placeholder="Enter number of vehicles" required/></div>
+            <div className="vehicle-signup-list">{form.vehicles.map((v,i)=><article className="vehicle-signup-card" key={i}><div className="vehicle-card-head"><strong>Vehicle {i+1}</strong></div><div className="form-grid"><SelectField label="Type of Vehicle" name={`vehicle-type-${i}`} value={v.type} onChange={e=>updateVehicle(i,"type",e.target.value)} options={["Car","Auto","Bike","Other"]} placeholder="Select vehicle type" required/><div className="field"><label>Vehicle Number <em>*</em></label><input value={v.vehicleNumber} onChange={e=>updateVehicle(i,"vehicleNumber",e.target.value)} placeholder="e.g. AP XX XX XXXX" required/></div></div>{v.type==="Other"&&<div className="field"><label>Define Vehicle Type <em>*</em></label><input value={v.customType} onChange={e=>updateVehicle(i,"customType",e.target.value)} placeholder="Enter vehicle type" required/></div>}<div className="vehicle-upload-grid"><FileUpload label="Recent Vehicle Photo" file={v.vehiclePhoto} accept="image/jpeg,image/png,image/webp" onChange={e=>readVehicleFile(i,"vehiclePhoto",e)}/><FileUpload label="Guide Driving License" file={v.drivingLicense} accept="application/pdf,image/jpeg,image/png,image/webp" onChange={e=>readVehicleFile(i,"drivingLicense",e)}/></div></article>)}</div></>}
+          </section>
           <div className="field identity-proof-field">
-            <label>Identity Proof upload <em>*</em></label>
-            <label className="identity-upload-box">
-              <i className="bi bi-cloud-arrow-up"></i>
-              <strong>{form.identityProof ? form.identityProof.name : "Choose identity proof"}</strong>
-              <small>PDF, JPG, PNG or WEBP · Max 8 MB</small>
-              <input type="file" accept="application/pdf,image/jpeg,image/png,image/webp" onChange={handleIdentityProof} required={!form.identityProof}/>
-            </label>
-            {form.identityProof && <small className="upload-success"><i className="bi bi-check-circle-fill"></i> Identity proof selected ({Math.ceil(form.identityProof.size/1024)} KB)</small>}
+            <label>Identity Proof <em>*</em></label>
+            <div className={`identity-upload-box ${form.identityProof ? "has-file" : ""}`}>
+              <input id="guide-identity-proof" className="identity-file-input" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" onChange={handleIdentityProof} required={!form.identityProof}/>
+              {!form.identityProof ? (
+                <label htmlFor="guide-identity-proof" className="identity-upload-empty">
+                  <i className="bi bi-cloud-arrow-up"></i>
+                  <strong>Upload a file</strong>
+                </label>
+              ) : (
+                <label htmlFor="guide-identity-proof" className="identity-file-name">{form.identityProof.name}</label>
+              )}
+            </div>
           </div>
           <h5>Account Security</h5>
           <div className="form-grid">
@@ -162,6 +197,32 @@ function AuthRoleInfo({role}) {
  </section>
 }
 
+function LanguageMultiSelect({selected,onToggle,options,required}){
+ const [open,setOpen]=useState(false);
+ return <div className="field language-multi-field">
+   <label>Languages You Speak <em>*</em></label>
+   <div className={`language-multi-select ${open ? "open" : ""}`}>
+     <button type="button" className="language-multi-trigger" onClick={()=>setOpen(!open)} aria-expanded={open}>
+       <span className={selected.length ? "language-selected-text" : "language-placeholder"}>{selected.length ? `${selected.length} language${selected.length>1?"s":""} selected` : "Select languages you can speak"}</span>
+       <i className={`bi bi-chevron-${open ? "up" : "down"}`}></i>
+     </button>
+     {open && <div className="language-options">
+       <div className="language-options-head"><strong>Select languages</strong><span>{selected.length} selected</span></div>
+       <div className="language-options-list">{options.map(language=><label className="language-option" key={language}>
+         <input type="checkbox" checked={selected.includes(language)} onChange={()=>onToggle(language)}/>
+         <span className="language-check"><i className="bi bi-check"></i></span>
+         <span>{language}</span>
+       </label>)}</div>
+       <button type="button" className="language-done" onClick={()=>setOpen(false)}>Done</button>
+     </div>}
+   </div>
+   {selected.length>0 && <div className="language-chips">{selected.map(language=><button type="button" key={language} onClick={()=>onToggle(language)}>{language} <i className="bi bi-x"></i></button>)}</div>}
+   {!selected.length && required && <small className="field-hint">Select one or more languages.</small>}
+ </div>
+}
+
+function FileUpload({label,file,accept,onChange}){return <div className="field vehicle-file-field"><label>{label} <em>*</em></label><label className={`vehicle-file-box ${file?"has-file":""}`}><input type="file" accept={accept} onChange={onChange}/>{file?<><i className="bi bi-file-earmark-check"/><strong>{file.name}</strong></>:<><i className="bi bi-cloud-arrow-up"/><strong>Upload a file</strong></>}</label></div>}
+
 function PasswordField({label,name,value,onChange,placeholder,required,className=""}){
  const [show,setShow]=useState(false);
  return <div className="field password-field">
@@ -174,3 +235,10 @@ function PasswordField({label,name,value,onChange,placeholder,required,className
 }
 
 function Field({label,name,value,onChange,type="text",placeholder,required,max,min,maxLength}){return <div className="field"><label>{label} {required&&<em>*</em>}</label><input name={name} type={type} value={value} onChange={onChange} placeholder={placeholder||`Enter ${label.toLowerCase()}`} max={max} min={min} maxLength={maxLength} required={required}/></div>}
+
+function SelectField({label,name,value,onChange,options,placeholder,required}){
+ return <div className="field"><label>{label} {required&&<em>*</em>}</label><select name={name} value={value} onChange={onChange} required={required}>
+   <option value="">{placeholder || `Select ${label.toLowerCase()}`}</option>
+   {options.map(option=><option key={option} value={option}>{option}</option>)}
+ </select></div>
+}

@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { getUser, logoutSession, setLoggedIn } from "../utils";
+import { getUser, logoutSession, setLoggedIn, fetchNotifications } from "../utils";
 import BrandMark from "./BrandMark";
 import ThemeToggle from "./ThemeToggle";
 
 export default function GuideNavbar() {
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [unreadCount,setUnreadCount]=useState(0);
   const location = useLocation();
   const navigate = useNavigate();
   const user = getUser() || {};
+  React.useEffect(()=>{const load=async()=>setUnreadCount((await fetchNotifications()).filter(n=>!n.read).length);load();const timer=setInterval(load,5000);return()=>clearInterval(timer)},[]);
 
   async function logout() {
     await logoutSession();
@@ -19,7 +21,7 @@ export default function GuideNavbar() {
 
   const navLinks = [
     { to: "/guide", icon: "bi-house-door", label: "Dashboard" },
-    { to: "/guide/requests", icon: "bi-bell", label: "Requests" },
+    { to: "/guide/bookings", icon: "bi-clipboard-check", label: "My Bookings" },
     { to: "/guide/contributions", icon: "bi-geo-alt", label: "Contributions" },
     { to: "/guide/profile", icon: "bi-person", label: "Profile" }
   ];
@@ -67,6 +69,7 @@ export default function GuideNavbar() {
 
         <div className="user-nav-right">
           <ThemeToggle compact />
+          <button className="icon-btn guide-nav-notification" onClick={()=>navigate("/guide/bookings")} title="My Bookings notifications"><i className="bi bi-bell-fill"/>{unreadCount>0&&<b>{unreadCount}</b>}</button>
           <button
             className="user-chip guide-user-chip"
             onClick={() => setProfileOpen(!profileOpen)}
@@ -109,8 +112,8 @@ export default function GuideNavbar() {
           <Link to="/guide/contributions" onClick={() => setProfileOpen(false)}>
             <i className="bi bi-geo-alt"></i> My Contributions
           </Link>
-          <Link to="/guide/requests" onClick={() => setProfileOpen(false)}>
-            <i className="bi bi-bell"></i> Traveller Requests
+          <Link to="/guide/bookings" onClick={() => setProfileOpen(false)}>
+            <i className="bi bi-clipboard-check"></i> My Bookings
           </Link>
           <button onClick={logout}>
             <i className="bi bi-box-arrow-right"></i> Logout

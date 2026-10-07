@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { packages as defaultPackages } from "../data/travelData";
 import DestinationCard from "../components/DestinationCard";
 import PackageCard from "../components/PackageCard";
 import { fetchGuidePackages } from "../utils";
@@ -34,18 +33,18 @@ export default function Recommendations({mode}){
     setDestinations([...priority,...rest]);
     setLoadingPlaces(false);
   }})();return()=>{active=false}},[]);
- const allPackages=useMemo(()=>[...guidePackages,...defaultPackages],[guidePackages]);
+ const allPackages=useMemo(()=>guidePackages,[guidePackages]);
  const showPlaces=mode!=="packages", showPackages=mode!=="places";
  const isAllPlaces=mode==="places", isAllPackages=mode==="packages";
  const placeItems=mode==="places"?destinations:destinations.slice(0,6);
  const packageItems=mode==="packages"?allPackages:allPackages.slice(0,4);
  return <main className="inner-page recommendation-page">
-  <div className="inner-header"><span className="eyebrow"><i className="bi bi-stars"></i> {isAllPlaces||isAllPackages?"Explore":"Personalized for you"}</span><h1>{isAllPlaces?"All Places":isAllPackages?"All Packages":"Smart Recommendations"}</h1><p>{isAllPlaces?"Browse destinations and explore local places.":isAllPackages?"Browse every available package from Smart Travel Guide and Local Guides.":"Priority suggestions begin with Vijayawada, Visakhapatnam and Tirupati places."}</p></div>
+  <div className="inner-header"><span className="eyebrow"><i className="bi bi-stars"></i> {isAllPlaces||isAllPackages?"Explore":"Personalized for you"}</span><h1>{isAllPlaces?"All Places":isAllPackages?"All Packages":"Smart Recommendations"}</h1><p>{isAllPlaces?"Browse destinations and explore local places.":isAllPackages?"Browse packages published by Local Guides.":"Priority suggestions begin with Vijayawada, Visakhapatnam and Tirupati places."}</p></div>
   <div className="recommendation-banner"><i className="bi bi-stars"></i><div><strong>Priority recommendations</strong><p>Vijayawada, Visakhapatnam and Tirupati attractions are kept at the top of your recommendations.</p></div></div>
   {showPlaces&&<section className="recommendation-section"><div className="section-heading"><div><h2>{isAllPlaces?"All Places":"Recommended Places"}</h2><p>{isAllPlaces?"Explore destinations across the catalogue.":"Vijayawada, Visakhapatnam and Tirupati places appear first."}</p></div>{mode!=="places"&&<Link to="/user/recommendations/places">View All Places</Link>}</div>
    {isAllPlaces&&<div className="guide-date-filter"><label><i className="bi bi-person-badge"></i> Check local guide availability</label><input type="date" min={today} value={guideDate} onChange={e=>setGuideDate(e.target.value)}/></div>}
    {loadingPlaces?<div className="place-loading compact-loading"><div className="spinner-border text-primary"/><span>Loading destinations…</span></div>:<div className="destination-grid">{placeItems.map(x=><DestinationCard item={x} key={x.id} guideDate={isAllPlaces?guideDate:""}/>)}</div>}
   </section>}
-  {showPackages&&<section className="recommendation-section"><div className="section-heading"><div><h2>{isAllPackages?"All Packages":"Recommended Packages"}</h2><p>{isAllPackages?"All available packages from Smart Travel Guide and Local Guides.":"Packages now include Vijayawada, Visakhapatnam, Tirupati and Hyderabad."}</p></div>{mode!=="packages"&&<Link to="/user/recommendations/packages">View All Packages</Link>}</div><div className="package-grid">{packageItems.map(x=><PackageCard item={x} key={`${x.guideEmail||"smart"}-${x.id}`}/>)}</div></section>}
+  {showPackages&&<section className="recommendation-section"><div className="section-heading"><div><h2>{isAllPackages?"All Packages":"Recommended Packages"}</h2><p>{isAllPackages?"All available packages from Smart Travel Guide and Local Guides.":"Packages published by Local Guides appear here when available."}</p></div>{mode!=="packages"&&<Link to="/user/recommendations/packages">View All Packages</Link>}</div><div className="package-grid">{packageItems.map(x=><PackageCard item={x} key={`${x.guideEmail||"smart"}-${x.id}`}/>)}</div></section>}
  </main>
 }

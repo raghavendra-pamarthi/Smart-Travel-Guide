@@ -1,6 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { packages as defaultPackages } from "../data/travelData";
 import DestinationCard from "../components/DestinationCard";
 import PackageCard from "../components/PackageCard";
 import { PRIORITY_PLACE_IMAGES } from "../data/priorityPlaceImages";
@@ -32,9 +31,8 @@ export default function UserDashboard(){
    return()=>{active=false};
  },[]);
  useEffect(()=>{const refresh=async()=>setGuidePackages(await fetchGuidePackages()); refresh(); window.addEventListener("stg-data-change",refresh); const t=setInterval(refresh,5000); window.addEventListener("focus",refresh); return()=>{window.removeEventListener("stg-data-change",refresh);window.removeEventListener("focus",refresh);clearInterval(t)}},[]);
- const allPackages=useMemo(()=>[...guidePackages,...defaultPackages], [guidePackages]);
  const recommendedPlaces=destinations;
- const recommendedPackages=allPackages.slice(0,4);
+ const recommendedPackages=guidePackages.slice(0,4);
  return <main className="user-page">
   <section className="user-hero">
    <div className="user-hero-content">
