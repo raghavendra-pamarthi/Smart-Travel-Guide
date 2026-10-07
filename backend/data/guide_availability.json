@@ -1,17 +1,5 @@
 [
   {
-    "city": "Agra",
-    "fromDate": "2026-10-18",
-    "toDate": "2026-10-21",
-    "date": "2026-10-18",
-    "id": "9651cbdf-0a40-40e8-979f-fe3512ee211a",
-    "guideEmail": "sai@gmail.com",
-    "guideName": "sai",
-    "guidePhone": "6302131350",
-    "guideEmailAddress": "sai@gmail.com",
-    "createdAt": "2026-10-07T04:16:40.214Z"
-  },
-  {
     "city": "Vijayawada",
     "date": "2026-10-02",
     "id": "254199de-b278-4175-9a07-d4d2b8f9a138",

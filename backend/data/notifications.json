@@ -1,39 +1,52 @@
 [
   {
-    "id": "b0658ff7-fb76-4d1d-a678-41afbc60d1b7",
-    "recipientEmail": "saibhargavi1350@gmail.com",
-    "type": "guide_accepted",
-    "requestId": "00de2329-b859-474a-92e1-26053f4433bf",
-    "bookingId": "00de2329-b859-474a-92e1-26053f4433bf",
-    "message": "sai accepted your Guide/Travel System request for Agra.",
-    "read": true,
-    "createdAt": "2026-10-07T04:17:20.177Z"
-  },
-  {
-    "id": "8d7e5aac-d229-4fef-8144-769e0f7a785e",
-    "recipientEmail": "sai@gmail.com",
-    "type": "guide_request",
-    "requestId": "00de2329-b859-474a-92e1-26053f4433bf",
-    "bookingId": "00de2329-b859-474a-92e1-26053f4433bf",
-    "message": "Sai Bhargavi sent a Guide/Travel System request for Agra. Open My Bookings to review it.",
-    "read": false,
-    "createdAt": "2026-10-07T04:17:04.401Z"
-  },
-  {
-    "id": "e4f33efb-bf92-4d6f-92b6-022e5b9322d0",
-    "recipientEmail": "sai@gmail.com",
-    "type": "place_verification",
-    "message": "Your place submission \"Agra\" is now Approved.",
-    "read": false,
-    "createdAt": "2026-10-07T04:08:20.950Z"
-  },
-  {
-    "id": "0231b4ac-1721-4f44-a07f-89b804e081d8",
+    "id": "353a1982-cfcc-4d7b-9635-1442d6d737e4",
     "recipientEmail": "sai@gmail.com",
     "type": "admin_verification",
     "message": "Your Local Guide account has been verified by STG Admin.",
     "read": false,
-    "createdAt": "2026-10-07T04:08:09.929Z"
+    "createdAt": "2026-10-07T03:13:48.141Z"
+  },
+  {
+    "id": "a98144aa-3811-4c6c-944b-6f45b0433acb",
+    "recipientEmail": "sai@gmail.com",
+    "type": "admin_verification",
+    "message": "STG Admin requested changes to your Local Guide verification details.",
+    "read": true,
+    "createdAt": "2026-10-07T03:13:10.498Z"
+  },
+  {
+    "id": "553c80eb-40d2-4a00-a0ef-6a1f92504d09",
+    "recipientEmail": "raghavapamarthi07@gmail.com",
+    "type": "admin_verification",
+    "message": "Your Local Guide account has been verified by STG Admin.",
+    "read": false,
+    "createdAt": "2026-10-07T03:09:44.444Z"
+  },
+  {
+    "id": "7ddf6775-11c2-43a3-b247-5faaff109976",
+    "recipientEmail": "sai@gmail.com",
+    "type": "admin_verification",
+    "message": "Your Local Guide verification was rejected by STG Admin.",
+    "read": true,
+    "createdAt": "2026-10-07T03:09:15.543Z"
+  },
+  {
+    "id": "aa174be4-be96-49fa-8aed-36349778efed",
+    "recipientEmail": "sai@gmail.com",
+    "type": "place_verification",
+    "message": "Your place submission \"vijayawada\" is now Rejected.",
+    "read": true,
+    "createdAt": "2026-10-07T03:09:03.872Z"
+  },
+  {
+    "id": "babbce5d-b849-4c94-be67-a08b380ebdf0",
+    "recipientEmail": "raghavapamarthi07@gmail.com",
+    "type": "package_booking",
+    "bookingId": "f06d5971-6bc5-4bf7-84bc-d3dd67d95be3",
+    "message": "Sai Bhargavi booked your package \"Raghavendra\".",
+    "read": false,
+    "createdAt": "2026-10-07T02:52:02.651Z"
   },
   {
     "id": "eaeb5aa2-9cef-4d3c-aabf-2e2f8c8b623c",

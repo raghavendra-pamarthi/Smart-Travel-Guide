@@ -1,1 +1,171 @@
-{}
+{
+  "raghavendrapamarthi07@gmail.com": {
+    "name": "Raghava",
+    "email": "raghavendrapamarthi07@gmail.com",
+    "phone": "9392757480",
+    "dob": "",
+    "age": "20",
+    "gender": "Male",
+    "state": "",
+    "address": "",
+    "pincode": "",
+    "travelTypes": [],
+    "budget": "",
+    "interests": "",
+    "guideBio": "",
+    "guideExpertise": "",
+    "languages": "",
+    "experience": "",
+    "qualification": "",
+    "additionalInterests": "",
+    "areaInterests": [],
+    "identityProof": null,
+    "role": "user",
+    "passwordHash": "15e2b0d3c33891ebb0f1ef609ec419420c20e320ce94c65fbc8c3312448eb225",
+    "createdAt": "2026-10-01T09:33:00.662Z",
+    "verificationHistory": []
+  },
+  "raghavapamarthi07@gmail.com": {
+    "name": "raghava",
+    "email": "raghavapamarthi07@gmail.com",
+    "phone": "9392757489",
+    "dob": "",
+    "age": "20",
+    "gender": "Male",
+    "state": "",
+    "address": "Ongole",
+    "pincode": "523225",
+    "travelTypes": [],
+    "budget": "",
+    "interests": "",
+    "guideBio": "",
+    "guideExpertise": "",
+    "languages": "English,Telugu",
+    "experience": "2",
+    "qualification": "",
+    "additionalInterests": "",
+    "areaInterests": [
+      "Heritage & History",
+      "Adventure & Trekking",
+      "Beaches & Coastal",
+      "Family Tours",
+      "Shopping & Local Markets"
+    ],
+    "identityProof": {
+      "fileName": "712ade06211dca8c84d309aae6865d65b0156dff9f7f2a844127be1a05420551.png",
+      "originalName": "Screenshot From 2026-09-30 00-22-26.png",
+      "mimeType": "image/png",
+      "size": 578151,
+      "uploadedAt": "2026-10-01T09:35:04.114Z"
+    },
+    "role": "guide",
+    "passwordHash": "15e2b0d3c33891ebb0f1ef609ec419420c20e320ce94c65fbc8c3312448eb225",
+    "createdAt": "2026-10-01T09:35:04.114Z",
+    "verificationStatus": "Verified",
+    "verificationHistory": [
+      {
+        "status": "Verified",
+        "at": "2026-10-07T03:09:44.443Z",
+        "note": ""
+      },
+      {
+        "status": "Verified",
+        "at": "2026-10-01T10:13:45.617Z",
+        "note": ""
+      },
+      {
+        "status": "Pending",
+        "at": "2026-10-01T09:35:04.114Z",
+        "note": "Guide registration submitted."
+      }
+    ]
+  },
+  "saibhargavi1350@gmail.com": {
+    "name": "Sai Bhargavi",
+    "email": "saibhargavi1350@gmail.com",
+    "phone": "6302131350",
+    "dob": "",
+    "age": "20",
+    "gender": "Female",
+    "state": "",
+    "address": "",
+    "pincode": "",
+    "travelTypes": [],
+    "budget": "",
+    "interests": "",
+    "guideBio": "",
+    "guideExpertise": "",
+    "languages": "",
+    "experience": "",
+    "qualification": "",
+    "additionalInterests": "",
+    "areaInterests": [],
+    "identityProof": null,
+    "vehiclesAvailable": "No",
+    "vehicles": [],
+    "role": "user",
+    "passwordHash": "15e2b0d3c33891ebb0f1ef609ec419420c20e320ce94c65fbc8c3312448eb225",
+    "createdAt": "2026-10-07T02:51:23.501Z",
+    "verificationHistory": []
+  },
+  "sai@gmail.com": {
+    "name": "bhargavi",
+    "email": "sai@gmail.com",
+    "phone": "6302131350",
+    "dob": "",
+    "age": "25",
+    "gender": "Female",
+    "state": "Andhra Pradesh",
+    "address": "Ongole",
+    "pincode": "523225",
+    "travelTypes": [],
+    "budget": "",
+    "interests": "",
+    "guideBio": "",
+    "guideExpertise": "",
+    "languages": "English, Telugu, Hindi",
+    "experience": "4",
+    "qualification": "",
+    "additionalInterests": "",
+    "areaInterests": [
+      "Heritage & History",
+      "Adventure & Trekking",
+      "Beaches & Coastal"
+    ],
+    "identityProof": {
+      "fileName": "b7d75290ffc4dcb6acf9aa3618665d54008d530d5253848f8c8d538890d77dbf.png",
+      "originalName": "uml_object.png",
+      "mimeType": "image/png",
+      "size": 1295483,
+      "uploadedAt": "2026-10-07T03:00:56.417Z"
+    },
+    "vehiclesAvailable": "No",
+    "vehicles": [],
+    "role": "guide",
+    "passwordHash": "15e2b0d3c33891ebb0f1ef609ec419420c20e320ce94c65fbc8c3312448eb225",
+    "createdAt": "2026-10-07T03:00:56.417Z",
+    "verificationStatus": "Verified",
+    "verificationHistory": [
+      {
+        "status": "Verified",
+        "at": "2026-10-07T03:13:48.138Z",
+        "note": ""
+      },
+      {
+        "status": "Changes Required",
+        "at": "2026-10-07T03:13:10.496Z",
+        "note": ""
+      },
+      {
+        "status": "Rejected",
+        "at": "2026-10-07T03:09:15.542Z",
+        "note": ""
+      },
+      {
+        "status": "Pending",
+        "at": "2026-10-07T03:00:56.417Z",
+        "note": "Guide registration submitted."
+      }
+    ]
+  }
+}

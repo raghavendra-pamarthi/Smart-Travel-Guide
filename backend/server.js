@@ -23,7 +23,7 @@ app.get("/", (_req, res) => {
 });
 
 app.use(cors({ origin: FRONTEND_URL, credentials: true }));
-app.use(express.json({ limit: "12mb" }));
+app.use(express.json({ limit: "30mb" }));
 app.use(session({
   secret: process.env.SESSION_SECRET || "smart-travel-guide-development-secret",
   resave: false,
@@ -155,6 +155,7 @@ app.post("/api/signup", (req, res) => {
     travelTypes, budget, interests, guideBio, guideExpertise, languages,
     experience, qualification, additionalInterests, areaInterests,
     identityProofData, identityProofName, identityProofType, identityProofSize,
+    vehiclesAvailable, vehicles,
     password, role
   } = req.body;
   const accountRole = role === "guide" ? "guide" : "user";
@@ -211,11 +212,20 @@ app.post("/api/signup", (req, res) => {
 
   // Demo only: password is stored as a hash rather than plain text.
   const passwordHash = hashPassword(password);
+  let submittedVehicles = [];
+  if (accountRole === "guide" && String(vehiclesAvailable || "No") === "Yes") {
+    if (!Array.isArray(vehicles) || vehicles.length < 1) return res.status(400).json({ message: "Please provide at least one vehicle when vehicle availability is Yes." });
+    submittedVehicles = vehicles.map(v => ({ id: v.id || crypto.randomUUID(), type: String(v.type || "").trim(), customType: String(v.customType || "").trim(), vehicleNumber: String(v.vehicleNumber || "").trim(), vehiclePhoto: v.vehiclePhoto || null, drivingLicense: v.drivingLicense || null, verificationStatus: "Pending", verificationReason: "", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }));
+    for (const v of submittedVehicles) {
+      if (!v.type || !v.vehicleNumber || !v.vehiclePhoto?.data || !v.drivingLicense?.data) return res.status(400).json({ message: "Please complete every vehicle detail and upload the vehicle photo and driving license." });
+      if (v.type === "Other" && !v.customType) return res.status(400).json({ message: "Please enter the vehicle type for Other." });
+    }
+  }
   users.set(normalizedEmail, {
     name, email: normalizedEmail, phone, dob: dob || "", age: age || "", gender, state: state || "", address, pincode: pincode || "",
     travelTypes: Array.isArray(travelTypes) ? travelTypes : [], budget: budget || "", interests: interests || "",
     guideBio: guideBio || "", guideExpertise: guideExpertise || "", languages: languages || "", experience: experience || "", qualification: qualification || "", additionalInterests: additionalInterests || "",
-    areaInterests: Array.isArray(areaInterests) ? areaInterests : [], identityProof,
+    areaInterests: Array.isArray(areaInterests) ? areaInterests : [], identityProof, vehiclesAvailable: accountRole === "guide" ? (vehiclesAvailable === "Yes" ? "Yes" : "No") : "No", vehicles: submittedVehicles,
     role: accountRole, passwordHash, createdAt: new Date().toISOString(), verificationStatus: accountRole === "guide" ? "Pending" : undefined, verificationHistory: accountRole === "guide" ? [{ status: "Pending", at: new Date().toISOString(), note: "Guide registration submitted." }] : []
   });
   saveUsers();
@@ -236,7 +246,7 @@ app.post("/api/signup", (req, res) => {
 });
 
 app.put("/api/profile", requireSession, (req, res) => {
-  const { email, name, phone, dob, age, gender, state, address, pincode, travelTypes, budget, interests, guideBio, guideExpertise, languages, experience, qualification, additionalInterests, areaInterests, avatarData, avatarName } = req.body;
+  const { email, name, phone, dob, age, gender, state, address, pincode, travelTypes, budget, interests, guideBio, guideExpertise, languages, experience, qualification, additionalInterests, areaInterests, avatarData, avatarName, vehiclesAvailable } = req.body;
   const normalizedEmail = String(email || "").trim().toLowerCase();
   if (!req.authUser || req.authUser.email !== normalizedEmail) return res.status(403).json({ message: "You can only update your own profile." });
   const user = users.get(normalizedEmail);
@@ -259,7 +269,7 @@ app.put("/api/profile", requireSession, (req, res) => {
     user.avatarData = avatarData;
     user.avatarName = String(avatarName || "profile-picture");
   }
-  Object.assign(user, { name, phone, dob: dob || user.dob || "", age: age || user.age || "", gender, state: state || user.state || "", address: address || user.address || "", pincode: pincode || user.pincode || "", travelTypes: Array.isArray(travelTypes) ? travelTypes : user.travelTypes || [], budget: budget || user.budget || "", interests: interests || "", guideBio: guideBio || "", guideExpertise: guideExpertise || user.guideExpertise || "", languages: languages || user.languages || "", experience: experience || "", qualification: qualification || "", additionalInterests: additionalInterests || "", areaInterests: Array.isArray(areaInterests) ? areaInterests : user.areaInterests || [] });
+  Object.assign(user, { name, phone, dob: dob || user.dob || "", age: age || user.age || "", gender, state: state || user.state || "", address: address || user.address || "", pincode: pincode || user.pincode || "", travelTypes: Array.isArray(travelTypes) ? travelTypes : user.travelTypes || [], budget: budget || user.budget || "", interests: interests || "", guideBio: guideBio || "", guideExpertise: guideExpertise || user.guideExpertise || "", languages: languages || user.languages || "", experience: experience || "", qualification: qualification || "", additionalInterests: additionalInterests || "", areaInterests: Array.isArray(areaInterests) ? areaInterests : user.areaInterests || [], vehiclesAvailable: user.role === "guide" ? (vehiclesAvailable === "Yes" ? "Yes" : (vehiclesAvailable === "No" ? "No" : (user.vehiclesAvailable || "No"))) : user.vehiclesAvailable });
   saveUsers();
   const { passwordHash: _, ...safeUser } = user;
   res.json({ message: "Profile updated successfully.", user: safeUser });
@@ -461,16 +471,9 @@ function enumerateDates(startDate, endDate) {
   }
   return dates;
 }
-function guideHasFullAvailability(guideEmail, city, startDate, endDate, availabilityList = null) {
-  const all = availabilityList || loadJsonArray(availabilityFile);
-  const targetCity = String(city || '').trim().toLowerCase();
-  const availableDates = new Set(all
-    .filter(x => normalizedEmail(x.guideEmail) === normalizedEmail(guideEmail))
-    .filter(x => String(x.city || x.placeCity || '').trim().toLowerCase() === targetCity)
-    .map(x => x.date)
-  );
-  return enumerateDates(startDate, endDate).every(date => availableDates.has(date));
-}
+function availabilityCoversDate(item, date) { const from=String(item.fromDate||item.date||""); const to=String(item.toDate||item.date||""); return Boolean(from&&to&&date>=from&&date<=to); }
+function guideHasFullAvailability(guideEmail, city, startDate, endDate, availabilityList = null) { const all=availabilityList||loadJsonArray(availabilityFile); const targetCity=String(city||'').trim().toLowerCase(); return enumerateDates(startDate,endDate).every(date=>all.some(x=>normalizedEmail(x.guideEmail)===normalizedEmail(guideEmail)&&String(x.city||x.placeCity||'').trim().toLowerCase()===targetCity&&availabilityCoversDate(x,date))); }
+function guideHasAnyAvailability(guideEmail, city, startDate, endDate, availabilityList = null) { const all=availabilityList||loadJsonArray(availabilityFile); const targetCity=String(city||'').trim().toLowerCase(); const requestedDates=enumerateDates(startDate,endDate); return all.some(x=>normalizedEmail(x.guideEmail)===normalizedEmail(guideEmail)&&String(x.city||x.placeCity||'').trim().toLowerCase()===targetCity&&requestedDates.some(date=>availabilityCoversDate(x,date))); }
 function synchronizeGuideRequestStatuses() {
   const requests = loadJsonArray(guideRequestsFile);
   const availability = loadJsonArray(availabilityFile);
@@ -481,10 +484,10 @@ function synchronizeGuideRequestStatuses() {
   let notificationsChanged = false;
   for (const request of requests) {
     if (!['Pending', 'Accepted'].includes(request.status)) continue;
-    const stillAvailable = guideHasFullAvailability(request.guideEmail, request.location, request.startDate, request.endDate, availability);
+    const stillAvailable = guideHasAnyAvailability(request.guideEmail, request.location, request.startDate, request.endDate, availability);
     if (stillAvailable) continue;
     request.status = 'Not Available';
-    request.statusReason = 'The Local Guide is no longer available for all requested dates.';
+    request.statusReason = 'The Local Guide is no longer available within the requested date range.';
     request.updatedAt = new Date().toISOString();
     requestsChanged = true;
     const booking = bookings.find(b => String(b.requestId || b.id) === String(request.id) && b.bookingType === 'guide_request');
@@ -539,13 +542,11 @@ app.get("/api/guide/availability", requireSession, (req, res) => {
 
 app.post("/api/guide/availability", requireSession, requireApprovedGuide, (req, res) => {
   const record = req.body || {};
-  const city = String(record.city || "").trim();
-  const date = String(record.date || "");
-  if (!city || !date) return res.status(400).json({ message: "City and available date are required." });
-  const all = loadJsonArray(availabilityFile);
-  const guideEmail = normalizedEmail(req.authUser.email);
-  if (all.some(x => normalizedEmail(x.guideEmail) === guideEmail && String(x.city || x.placeCity || "").trim().toLowerCase() === city.toLowerCase() && x.date === date)) return res.status(409).json({ message: "You are already available in this city on that date." });
-  const saved = { city, date, id: record.id || crypto.randomUUID(), guideEmail: req.authUser.email, guideName: req.authUser.name, guidePhone: req.authUser.phone || "", guideEmailAddress: req.authUser.email, createdAt: new Date().toISOString() };
+  const city = String(record.city || "").trim(); const fromDate = String(record.fromDate || record.date || ""); const toDate = String(record.toDate || record.date || fromDate);
+  if (!city || !fromDate || !toDate || toDate < fromDate) return res.status(400).json({ message: "City and a valid availability date range are required." });
+  const all = loadJsonArray(availabilityFile); const guideEmail = normalizedEmail(req.authUser.email);
+  if (all.some(x => normalizedEmail(x.guideEmail) === guideEmail && String(x.city || x.placeCity || "").trim().toLowerCase() === city.toLowerCase() && dateRangeOverlaps(fromDate,toDate,String(x.fromDate||x.date||""),String(x.toDate||x.date||"")))) return res.status(409).json({ message: "You already have availability overlapping this city and date range." });
+  const saved = { city, fromDate, toDate, date: fromDate, id: record.id || crypto.randomUUID(), guideEmail: req.authUser.email, guideName: req.authUser.name, guidePhone: req.authUser.phone || "", guideEmailAddress: req.authUser.email, createdAt: new Date().toISOString() };
   all.unshift(saved);
   saveJsonArray(availabilityFile, all);
   res.status(201).json({ availability: saved });
@@ -575,13 +576,19 @@ app.get("/api/guide/search", requireSession, (req, res) => {
     const guideStatus = user.verificationStatus || "Verified";
     if (guideStatus !== "Verified") continue;
     const key = email;
-    if (!guides.has(key)) guides.set(key, { name: user.name, email: user.email, phone: user.phone, age: user.age, gender: user.gender, experience: user.experience || "", languages: user.languages || "", guideBio: user.guideBio || "", areaInterests: user.areaInterests || [], previousTrips: loadJsonArray(bookingsFile).filter(b => normalizedEmail(b.guideEmail) === email).length, availableDates: [] });
-    guides.get(key).availableDates.push(item.date);
+    if (!guides.has(key)) guides.set(key, { name: user.name, email: user.email, phone: user.phone, age: user.age, gender: user.gender, experience: user.experience || "", languages: user.languages || "", guideBio: user.guideBio || "", areaInterests: user.areaInterests || [], vehicles: (user.vehicles || []).filter(v => v.verificationStatus === "Verified").map(sanitizeVehicleForPublic), previousTrips: loadJsonArray(bookingsFile).filter(b => normalizedEmail(b.guideEmail) === email).length, availableDates: [] });
+    guides.get(key).availableDates.push(...enumerateDates(String(item.fromDate || item.date || ""), String(item.toDate || item.date || item.fromDate || "")));
   }
   const neededDates = enumerateDates(startDate, endDate);
   const result = [...guides.values()]
     .map(g => ({ ...g, availableDates: [...new Set(g.availableDates)].sort() }))
-    .filter(g => !neededDates.length || neededDates.every(d => g.availableDates.includes(d)));
+    .filter(g => !neededDates.length || neededDates.some(d => g.availableDates.includes(d)))
+    .map(g => {
+      g.availableDates = neededDates.length ? g.availableDates.filter(d => neededDates.includes(d)) : g.availableDates;
+      const guide = users.get(normalizedEmail(g.email));
+      const profile = guide ? Object.fromEntries(Object.entries(guide).filter(([key, value]) => !['passwordHash','identityProof','verificationHistory'].includes(key) && value !== undefined)) : {};
+      return { ...g, avatarData: guide?.avatarData || '', profile };
+    });
   res.json(result);
 });
 
@@ -604,7 +611,7 @@ app.get("/api/guide/requests", requireSession, (req, res) => {
   } else {
     return res.status(403).json({ message: "This account cannot access guide requests." });
   }
-  res.json(all.map(x => { const guide=users.get(normalizedEmail(x.guideEmail)); const traveller=users.get(normalizedEmail(x.travellerEmail)); return { ...x, guideName:guide?.name||x.guideName, guidePhone:guide?.phone||x.guidePhone||"", travellerName:traveller?.name||x.travellerName }; }));
+  res.json(all.map(x => { const guide=users.get(normalizedEmail(x.guideEmail)); const traveller=users.get(normalizedEmail(x.travellerEmail)); const profile=guide ? Object.fromEntries(Object.entries(guide).filter(([key,value]) => !['passwordHash','identityProof','verificationHistory'].includes(key) && value !== undefined)) : {}; return { ...x, guideName:guide?.name||x.guideName, guidePhone:guide?.phone||x.guidePhone||"", avatarData:guide?.avatarData||x.avatarData||"", guideProfile:profile, travellerName:traveller?.name||x.travellerName }; }));
 });
 
 app.post("/api/guide/requests", requireSession, (req, res) => {
@@ -616,7 +623,7 @@ app.post("/api/guide/requests", requireSession, (req, res) => {
   if (!isGuideVerified(guide)) return res.status(409).json({ message: "This Local Guide is not currently verified by STG Admin." });
   if (!body.tripId || !body.location || !Array.isArray(body.places) || !body.places.length) return res.status(400).json({ message: "Trip, location and selected places are required." });
   if (!body.startDate || !body.endDate || body.endDate < body.startDate) return res.status(400).json({ message: "A valid guide date range is required." });
-  if (!guideHasFullAvailability(guide.email, body.location, body.startDate, body.endDate)) return res.status(409).json({ message: "This Local Guide is no longer available for all requested dates." });
+  if (!guideHasAnyAvailability(guide.email, body.location, body.startDate, body.endDate)) return res.status(409).json({ message: "This Local Guide is no longer available within the requested date range." });
   const all = synchronizeGuideRequestStatuses();
   if (all.some(x => normalizedEmail(x.travellerEmail) === normalizedEmail(req.authUser.email) && x.tripId === body.tripId && normalizedEmail(x.guideEmail) === guideEmail && ["Pending","Accepted"].includes(x.status))) return res.status(409).json({ message: "A request to this guide already exists for this trip." });
   const record = { ...body, id: body.id || crypto.randomUUID(), travellerEmail: req.authUser.email, travellerName: req.authUser.name, guideEmail: guide.email, guideName: guide.name, guidePhone: guide.phone || "", status: "Pending", rejectionReason: "", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
@@ -655,6 +662,27 @@ app.post("/api/guide/requests", requireSession, (req, res) => {
   res.status(201).json({ request: record, booking });
 });
 
+app.delete("/api/guide/requests/:id", requireSession, (req, res) => {
+  if (req.authUser.role !== "user") return res.status(403).json({ message: "Only travellers can remove guide requests." });
+  const all = synchronizeGuideRequestStatuses();
+  const index = all.findIndex(x => x.id === req.params.id);
+  if (index < 0) return res.status(404).json({ message: "Request not found." });
+  const target = all[index];
+  if (normalizedEmail(target.travellerEmail) !== normalizedEmail(req.authUser.email)) return res.status(403).json({ message: "You can only remove your own guide requests." });
+  if (target.status !== "Pending") return res.status(409).json({ message: `This request is already ${target.status}.` });
+  target.status = "Removed";
+  target.statusReason = "Request removed by Traveller.";
+  target.updatedAt = new Date().toISOString();
+  saveJsonArray(guideRequestsFile, all);
+  const bookings = loadJsonArray(bookingsFile);
+  const bookingIndex = bookings.findIndex(b => String(b.requestId || b.id) === String(target.id) && b.bookingType === "guide_request");
+  if (bookingIndex >= 0) { bookings[bookingIndex].status = "Removed"; bookings[bookingIndex].statusReason = target.statusReason; bookings[bookingIndex].updatedAt = target.updatedAt; saveJsonArray(bookingsFile, bookings); }
+  const notifications = loadJsonArray(notificationsFile);
+  notifications.unshift({ id: crypto.randomUUID(), recipientEmail: target.guideEmail, type: "guide_request_removed", requestId: target.id, bookingId: target.id, message: `${target.travellerName || "Traveller"} removed the Guide/Travel System request for ${target.location}.`, read: false, createdAt: new Date().toISOString() });
+  saveJsonArray(notificationsFile, notifications);
+  res.json({ request: target });
+});
+
 app.patch("/api/guide/requests/:id", requireSession, requireApprovedGuide, (req, res) => {
   const all = synchronizeGuideRequestStatuses();
   const index = all.findIndex(x => x.id === req.params.id);
@@ -664,9 +692,9 @@ app.patch("/api/guide/requests/:id", requireSession, requireApprovedGuide, (req,
   if (target.status !== "Pending") {
     return res.status(409).json({ message: target.status === "Not Available" ? "This request has been cancelled because the guide is no longer available." : `This request is already ${target.status}.` });
   }
-  if (!guideHasFullAvailability(target.guideEmail, target.location, target.startDate, target.endDate)) {
+  if (!guideHasAnyAvailability(target.guideEmail, target.location, target.startDate, target.endDate)) {
     target.status = "Not Available";
-    target.statusReason = "The Local Guide is no longer available for all requested dates.";
+    target.statusReason = "The Local Guide is no longer available within the requested date range.";
     target.updatedAt = new Date().toISOString();
     all[index] = target;
     saveJsonArray(guideRequestsFile, all);
@@ -676,7 +704,7 @@ app.patch("/api/guide/requests/:id", requireSession, requireApprovedGuide, (req,
     const notifications = loadJsonArray(notificationsFile);
     notifications.unshift({ id: crypto.randomUUID(), recipientEmail: target.travellerEmail, type: "guide_not_available", requestId: target.id, bookingId: target.id, message: `${target.guideName || "The selected Local Guide"} is no longer available for ${target.location}. Your guide request has been cancelled as Not Available.`, read: false, createdAt: new Date().toISOString() });
     saveJsonArray(notificationsFile, notifications);
-    return res.status(409).json({ message: "The guide is no longer available for all requested dates. The request was marked Not Available.", request: target });
+    return res.status(409).json({ message: "The guide is no longer available within the requested date range. The request was marked Not Available.", request: target });
   }
   const status = req.body?.status === "Accepted" ? "Accepted" : req.body?.status === "Rejected" ? "Rejected" : "";
   if (!status) return res.status(400).json({ message: "Status must be Accepted or Rejected." });
@@ -685,8 +713,38 @@ app.patch("/api/guide/requests/:id", requireSession, requireApprovedGuide, (req,
   target.statusReason = status === "Accepted" ? "Accepted by the Local Guide." : (target.rejectionReason || "Rejected by the Local Guide.");
   target.updatedAt = new Date().toISOString();
   all[index] = target;
-  saveJsonArray(guideRequestsFile, all);
   const bookings = loadJsonArray(bookingsFile);
+  if (status === "Accepted") {
+    const notificationsForOthers = [];
+    for (const other of all) {
+      if (other.id === target.id || other.tripId !== target.tripId || normalizedEmail(other.travellerEmail) !== normalizedEmail(target.travellerEmail) || other.status !== "Pending") continue;
+      other.status = "Timed Out";
+      other.statusReason = "This request was closed because another Local Guide accepted the trip.";
+      other.updatedAt = target.updatedAt;
+      const otherBooking = bookings.find(b => String(b.requestId || b.id) === String(other.id) && b.bookingType === "guide_request");
+      if (otherBooking) {
+        otherBooking.status = "Timed Out";
+        otherBooking.statusReason = other.statusReason;
+        otherBooking.updatedAt = target.updatedAt;
+      }
+      notificationsForOthers.push({
+        id: crypto.randomUUID(),
+        recipientEmail: other.travellerEmail,
+        type: "guide_timed_out",
+        requestId: other.id,
+        bookingId: otherBooking?.id || other.id,
+        message: `${other.guideName || "Local Guide"} request is no longer active because ${target.guideName || "another Local Guide"} accepted your Guide/Travel System request for ${target.location}.`,
+        read: false,
+        createdAt: new Date().toISOString()
+      });
+    }
+    if (notificationsForOthers.length) {
+      const existingNotifications = loadJsonArray(notificationsFile);
+      existingNotifications.unshift(...notificationsForOthers);
+      saveJsonArray(notificationsFile, existingNotifications);
+    }
+  }
+  saveJsonArray(guideRequestsFile, all);
   const bookingIndex = bookings.findIndex(b => String(b.requestId || b.id) === String(target.id) && b.bookingType === "guide_request");
   if (bookingIndex >= 0) {
     bookings[bookingIndex].status = status;
@@ -715,6 +773,12 @@ app.patch("/api/notifications/:id/read", requireSession, (req, res) => {
   res.json({ notification: target });
 });
 
+function guideVehicles(user) { return Array.isArray(user?.vehicles) ? user.vehicles : []; }
+function sanitizeVehicleForPublic(v) { return { id:v.id, type:v.type, customType:v.customType||"", vehicleNumber:v.vehicleNumber, vehiclePhoto:v.vehiclePhoto||null, verificationStatus:v.verificationStatus||"Pending", verificationReason:v.verificationReason||"" }; }
+app.get("/api/guide/vehicles", requireSession, (req,res)=>{ const email=normalizedEmail(req.query.guideEmail||req.authUser.email); const owner=normalizedEmail(req.authUser.email); if(req.authUser.role==="guide"&&email!==owner)return res.status(403).json({message:"You can only view your own vehicles."}); const guide=users.get(email); if(!guide||guide.role!=="guide")return res.status(404).json({message:"Local Guide not found."}); const list=guideVehicles(guide); res.json({vehicles:req.authUser.role==="user"?list.filter(v=>v.verificationStatus==="Verified").map(sanitizeVehicleForPublic):list}); });
+app.post("/api/guide/vehicles", requireSession, requireApprovedGuide, (req,res)=>{ if(req.authUser.role!=="guide")return res.status(403).json({message:"Only Local Guides can add vehicles."}); const v=req.body||{}; if(!v.type||!v.vehicleNumber||!v.vehiclePhoto?.data||!v.drivingLicense?.data)return res.status(400).json({message:"Vehicle type, number, recent photo and driving license are required."}); if(v.type==="Other"&&!String(v.customType||"").trim())return res.status(400).json({message:"Please enter the vehicle type for Other."}); if(Number(v.vehiclePhoto.size||0)>8*1024*1024||Number(v.drivingLicense.size||0)>8*1024*1024)return res.status(400).json({message:"Vehicle photo and driving license must each be 8 MB or smaller."}); const guide=users.get(normalizedEmail(req.authUser.email)); const vehicleNumber=String(v.vehicleNumber).trim().toUpperCase(); if(guideVehicles(guide).some(x=>String(x.vehicleNumber||"").trim().toUpperCase()===vehicleNumber))return res.status(409).json({message:"A vehicle with this vehicle number is already registered for your account."}); const saved={id:crypto.randomUUID(),type:String(v.type),customType:String(v.customType||""),vehicleNumber,vehiclePhoto:v.vehiclePhoto,drivingLicense:v.drivingLicense,verificationStatus:"Pending",verificationReason:"",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()}; guide.vehicles=guideVehicles(guide); guide.vehicles.unshift(saved); guide.vehiclesAvailable="Yes"; saveUsers(); saveAdminAction({type:"vehicle_registration",title:"New vehicle verification request",description:`${guide.name} submitted ${saved.customType||saved.type} vehicle ${saved.vehicleNumber} for verification.`,targetEmail:guide.email}); res.status(201).json({vehicle:saved}); });
+app.delete("/api/guide/vehicles/:id", requireSession, requireApprovedGuide, (req,res)=>{ if(req.authUser.role!=="guide")return res.status(403).json({message:"Only Local Guides can delete vehicles."}); const guide=users.get(normalizedEmail(req.authUser.email)); const list=guideVehicles(guide); if(!list.some(v=>String(v.id)===String(req.params.id)))return res.status(404).json({message:"Vehicle not found."}); guide.vehicles=list.filter(v=>String(v.id)!==String(req.params.id)); if(!guide.vehicles.length)guide.vehiclesAvailable="No"; saveUsers(); const packages=loadJsonArray(packagesFile); let changed=false; for(const pkg of packages){if(normalizedEmail(pkg.guideEmail)!==normalizedEmail(guide.email))continue; const before=Array.isArray(pkg.vehicles)?pkg.vehicles.length:0; pkg.vehicles=(pkg.vehicles||[]).filter(v=>String(v.vehicleId)!==String(req.params.id)); if(pkg.vehicles.length!==before){pkg.travelEnabled=pkg.vehicles.length>0; pkg.travelSystems=pkg.vehicles.map(v=>v.type); changed=true; pkg.updatedAt=new Date().toISOString();}} if(changed)saveJsonArray(packagesFile,packages); res.json({message:"Vehicle deleted and removed from future package transport options."}); });
+
 // Package and booking data is persisted on the server so traveller bookings
 // are visible to the Local Guide even when the two accounts use different browsers.
 app.get("/api/guide/packages", requireSession, (req, res) => {
@@ -741,12 +805,13 @@ app.get("/api/guide/packages", requireSession, (req, res) => {
 app.post("/api/guide/packages", requireSession, requireApprovedGuide, (req, res) => {
   const pkg = req.body || {};
   if (req.authUser.role !== "guide" || String(pkg.guideEmail || "").trim().toLowerCase() !== String(req.authUser.email || "").toLowerCase()) return res.status(403).json({ message: "Only the logged-in Local Guide can create packages for their account." });
-  if (!pkg.guideEmail || !pkg.name || !pkg.startDate || !pkg.endDate || !pkg.price || !pkg.description || !Array.isArray(pkg.places) || !pkg.places.length) {
-    return res.status(400).json({ message: "Please complete all package details and select at least one place." });
-  }
+  if (!pkg.guideEmail || !pkg.name || !pkg.startDate || !pkg.endDate || !pkg.price || !pkg.maxTravellers || !pkg.description || !Array.isArray(pkg.places) || !pkg.places.length) return res.status(400).json({ message: "Please complete all package details, maximum travellers and select at least one place." });
+  if (Number(pkg.price)<=0 || Number(pkg.maxTravellers)<=0) return res.status(400).json({ message: "Package total cost and maximum travellers must be greater than zero." });
+  const verifiedVehicles=(guideVehicles(users.get(normalizedEmail(req.authUser.email)))||[]).filter(v=>v.verificationStatus==="Verified"); const selectedVehicles=Array.isArray(pkg.vehicles)?pkg.vehicles:[];
+  if (selectedVehicles.some(v=>!verifiedVehicles.some(av=>String(av.id)===String(v.vehicleId)) || !v.totalCost || Number(v.totalCost)<=0)) return res.status(400).json({ message: "Only Admin-verified vehicles with a valid total cost can be included." });
   const all = loadJsonArray(packagesFile);
   const guide = users.get(String(req.authUser.email || "").trim().toLowerCase());
-  const record = { ...pkg, guideEmail: req.authUser.email, guideName: guide?.name || pkg.guideName || "Local Guide", guidePhone: guide?.phone || pkg.guidePhone || "", cities: packageCities(pkg), id: pkg.id || crypto.randomUUID(), createdAt: pkg.createdAt || new Date().toISOString(), updatedAt: new Date().toISOString() };
+  const record = { ...pkg, price:Number(pkg.price), maxTravellers:Number(pkg.maxTravellers), vehicles:selectedVehicles.map(v=>({...v,totalCost:Number(v.totalCost)})), guideEmail: req.authUser.email, guideName: guide?.name || pkg.guideName || "Local Guide", guidePhone: guide?.phone || pkg.guidePhone || "", cities: packageCities(pkg), id: pkg.id || crypto.randomUUID(), createdAt: pkg.createdAt || new Date().toISOString(), updatedAt: new Date().toISOString() };
   all.unshift(record);
   saveJsonArray(packagesFile, all);
   res.status(201).json({ package: record });
@@ -758,9 +823,10 @@ app.put("/api/guide/packages/:id", requireSession, requireApprovedGuide, (req, r
   if (index < 0) return res.status(404).json({ message: "Package not found." });
   if (normalizedEmail(all[index].guideEmail) !== normalizedEmail(req.authUser.email)) return res.status(403).json({ message: "You can only update your own packages." });
   const pkg = req.body || {};
-  if (!pkg.name || !pkg.startDate || !pkg.endDate || !pkg.price || !pkg.description || !Array.isArray(pkg.places) || !pkg.places.length) return res.status(400).json({ message: "Please complete all package details and select at least one place." });
+  if (!pkg.name || !pkg.startDate || !pkg.endDate || !pkg.price || !pkg.maxTravellers || !pkg.description || !Array.isArray(pkg.places) || !pkg.places.length) return res.status(400).json({ message: "Please complete all package details, maximum travellers and select at least one place." });
+  const verifiedVehicles=(guideVehicles(users.get(normalizedEmail(req.authUser.email)))||[]).filter(v=>v.verificationStatus==="Verified"); const selectedVehicles=Array.isArray(pkg.vehicles)?pkg.vehicles:[]; if(selectedVehicles.some(v=>!verifiedVehicles.some(av=>String(av.id)===String(v.vehicleId))||!v.totalCost||Number(v.totalCost)<=0))return res.status(400).json({message:"Only Admin-verified vehicles with a valid total cost can be included."});
   const guide = users.get(normalizedEmail(req.authUser.email));
-  const record = { ...all[index], ...pkg, guideEmail: req.authUser.email, guideName: guide?.name || all[index].guideName || "Local Guide", guidePhone: guide?.phone || "", cities: packageCities(pkg), updatedAt: new Date().toISOString() };
+  const record = { ...all[index], ...pkg, price:Number(pkg.price), maxTravellers:Number(pkg.maxTravellers), vehicles:selectedVehicles.map(v=>({...v,totalCost:Number(v.totalCost)})), guideEmail: req.authUser.email, guideName: guide?.name || all[index].guideName || "Local Guide", guidePhone: guide?.phone || "", cities: packageCities(pkg), updatedAt: new Date().toISOString() };
   all[index] = record;
   saveJsonArray(packagesFile, all);
   res.json({ package: record });
@@ -822,8 +888,10 @@ app.post("/api/bookings", requireSession, (req, res) => {
   if (normalizedEmail(booking.guideEmail) && normalizedEmail(booking.guideEmail) !== normalizedEmail(pkg.guideEmail)) {
     return res.status(400).json({ message: "The selected package and Local Guide do not match." });
   }
+  const bookingDate=String(booking.bookingDate||booking.startDate||""); if(!bookingDate||bookingDate<pkg.startDate||bookingDate>pkg.endDate)return res.status(400).json({message:"Please select a valid booking date within the package dates."});
+  const packageVehicles=Array.isArray(pkg.vehicles)?pkg.vehicles:[]; let selectedVehicle=null; if(booking.vehicleId){selectedVehicle=packageVehicles.find(v=>String(v.vehicleId)===String(booking.vehicleId)); if(!selectedVehicle)return res.status(400).json({message:"The selected vehicle is not available for this package."});}
   const all = loadJsonArray(bookingsFile);
-  const activeForPackage = all.filter(b => String(b.packageId) === String(pkg.id) && b.status !== "Cancelled");
+  const activeForPackage = all.filter(b => String(b.packageId) === String(pkg.id) && !["Cancelled","Rejected"].includes(b.status));
   if (activeForPackage.some(b => normalizedEmail(b.travellerEmail) === normalizedEmail(req.authUser.email))) {
     return res.status(409).json({ message: "You have already booked this package." });
   }
@@ -835,17 +903,46 @@ app.post("/api/bookings", requireSession, (req, res) => {
     ...booking,
     packageId: pkg.id, packageName: pkg.name, guideEmail: guide.email, guideName: guide.name,
     guidePhone: guide.phone || "", travellerName: req.authUser.name, travellerPhone: req.authUser.phone || "",
-    travellerEmail: req.authUser.email, startDate: pkg.startDate, endDate: pkg.endDate, days: pkg.days || booking.days || 0,
-    maxTravellers: maxTravellers || null, price: pkg.price, id: crypto.randomUUID(), status: "Confirmed", bookedAt: new Date().toISOString()
+    travellerEmail: req.authUser.email, startDate: bookingDate, endDate: bookingDate, bookingDate, days: 1,
+    maxTravellers: maxTravellers || null, price: Number(pkg.price), packageTotalCost:Number(pkg.price), selectedVehicle:selectedVehicle||null, vehicleId:selectedVehicle?.vehicleId||null, vehicleTotalCost:selectedVehicle?Number(selectedVehicle.totalCost):0, id: crypto.randomUUID(), status: "Pending", bookedAt: new Date().toISOString()
   };
   all.unshift(record);
   saveJsonArray(bookingsFile, all);
   const notifications = loadJsonArray(notificationsFile);
   const now = new Date().toISOString();
   notifications.unshift({ id: crypto.randomUUID(), recipientEmail: guide.email, type: "package_booking", bookingId: record.id, message: `${req.authUser.name} booked your package "${record.packageName}".`, read: false, createdAt: now });
-  notifications.unshift({ id: crypto.randomUUID(), recipientEmail: req.authUser.email, type: "booking_confirmed", bookingId: record.id, message: `Your booking for "${record.packageName}" is confirmed.`, read: false, createdAt: now });
   saveJsonArray(notificationsFile, notifications);
   res.status(201).json({ booking: record });
+});
+
+app.patch("/api/bookings/:id/status", requireSession, (req,res)=>{
+  if(req.authUser.role!=="guide")return res.status(403).json({message:"Only Local Guides can respond to package bookings."});
+  const all=loadJsonArray(bookingsFile); const index=all.findIndex(b=>String(b.id)===String(req.params.id)); if(index<0)return res.status(404).json({message:"Booking not found."}); const booking=all[index];
+  if(normalizedEmail(booking.guideEmail)!==normalizedEmail(req.authUser.email))return res.status(403).json({message:"You can only respond to your own bookings."});
+  if(booking.bookingType==="guide_request")return res.status(400).json({message:"Customized guide requests must be handled through the Guide Request workflow."});
+  if(booking.status!=="Pending")return res.status(409).json({message:`This booking is already ${booking.status||"processed"}.`});
+  const status=req.body?.status==="Confirmed"?"Confirmed":req.body?.status==="Rejected"?"Rejected":""; if(!status)return res.status(400).json({message:"Status must be Confirmed or Rejected."});
+  booking.status=status; booking.rejectionReason=status==="Rejected"?String(req.body?.rejectionReason||"").trim():""; booking.statusReason=status==="Confirmed"?"Confirmed by the Local Guide.":(booking.rejectionReason||"Rejected by the Local Guide."); booking.updatedAt=new Date().toISOString(); all[index]=booking; saveJsonArray(bookingsFile,all);
+  const ns=loadJsonArray(notificationsFile); ns.unshift({id:crypto.randomUUID(),recipientEmail:booking.travellerEmail,type:`booking_${status.toLowerCase()}`,bookingId:booking.id,message:status==="Confirmed"?`Your booking for "${booking.packageName}" has been confirmed by ${booking.guideName||"your Local Guide"}.`:`Your booking for "${booking.packageName}" was rejected by ${booking.guideName||"your Local Guide"}.${booking.rejectionReason?` Reason: ${booking.rejectionReason}`:""}`,read:false,createdAt:new Date().toISOString()}); saveJsonArray(notificationsFile,ns); res.json({booking});
+});
+
+app.patch("/api/bookings/:id/confirm", requireSession, (req, res) => {
+  if (req.authUser.role !== "guide") return res.status(403).json({ message: "Only Local Guides can confirm package bookings." });
+  const all = loadJsonArray(bookingsFile);
+  const index = all.findIndex(b => String(b.id) === String(req.params.id));
+  if (index < 0) return res.status(404).json({ message: "Booking not found." });
+  const booking = all[index];
+  if (normalizedEmail(booking.guideEmail) !== normalizedEmail(req.authUser.email)) return res.status(403).json({ message: "You can only confirm bookings for your own packages." });
+  if (booking.status !== "Pending") return res.status(409).json({ message: `This booking is already ${booking.status || "processed"}.` });
+  booking.status = "Confirmed";
+  booking.statusReason = "Confirmed by the Local Guide.";
+  booking.confirmedAt = new Date().toISOString();
+  saveJsonArray(bookingsFile, all);
+  const notifications = loadJsonArray(notificationsFile);
+  const now = new Date().toISOString();
+  notifications.unshift({ id: crypto.randomUUID(), recipientEmail: booking.travellerEmail, type: "booking_confirmed", bookingId: booking.id, message: `Your booking for "${booking.packageName}" has been confirmed by ${booking.guideName || "your Local Guide"}.`, read: false, createdAt: now });
+  saveJsonArray(notificationsFile, notifications);
+  res.json({ booking });
 });
 
 app.post("/api/forgot-password", async (req, res) => {
@@ -937,6 +1034,7 @@ function requireAdmin(req, res, next) {
 function adminSafeUser(user) {
   if (!user) return null;
   const { passwordHash: _, ...safe } = user;
+  if (safe.identityProof?.fileName) { try { const filePath=path.join(identityProofDir,safe.identityProof.fileName); if(fs.existsSync(filePath)){ safe.identityProof={...safe.identityProof,data:`data:${safe.identityProof.mimeType||"application/octet-stream"};base64,${fs.readFileSync(filePath).toString("base64")}`}; } } catch {} }
   return { ...safe, verificationStatus: safe.role === "guide" ? (safe.verificationStatus || "Verified") : safe.verificationStatus };
 }
 function saveAdminAction(action) {
@@ -1001,6 +1099,7 @@ app.get("/api/admin/guides", requireAdmin, (_req,res)=>{
   const packages=loadJsonArray(packagesFile), reviews=loadJsonArray(adminReviewsFile), all=[...users.values()].filter(u=>u.role==="guide").map(u=>{const ps=packages.filter(p=>normalizedEmail(p.guideEmail)===normalizedEmail(u.email));return {...adminSafeUser(u),packageCount:ps.length,packageNames:ps.map(p=>p.name).join(", ")||"None",reviewsReceived:reviews.filter(r=>normalizedEmail(r.guideEmail)===normalizedEmail(u.email)).length,identityProofSubmitted:u.identityProof?`${u.identityProof.originalName||u.identityProof.fileName} (${u.identityProof.mimeType||"document"})`:"Not submitted",registrationDate:u.createdAt||u.registeredAt||null};});
   res.json({items:all});
 });
+app.patch("/api/admin/guides/:email/vehicles/:vehicleId/status", requireAdmin, (req,res)=>{ const email=normalizedEmail(req.params.email),guide=users.get(email); if(!guide||guide.role!=="guide")return res.status(404).json({message:"Local Guide not found."}); const vehicle=guideVehicles(guide).find(v=>String(v.id)===String(req.params.vehicleId)); if(!vehicle)return res.status(404).json({message:"Vehicle not found."}); const status=String(req.body?.status||""); if(!["Pending","Verified","Rejected","Changes Required"].includes(status))return res.status(400).json({message:"Invalid vehicle verification status."}); vehicle.verificationStatus=status; vehicle.verificationReason=String(req.body?.reason||""); vehicle.updatedAt=new Date().toISOString(); saveUsers(); if(status!=="Verified"){const packages=loadJsonArray(packagesFile);let changed=false;for(const pkg of packages){if(normalizedEmail(pkg.guideEmail)!==email)continue;const before=Array.isArray(pkg.vehicles)?pkg.vehicles.length:0;pkg.vehicles=(pkg.vehicles||[]).filter(v=>String(v.vehicleId)!==String(vehicle.id));if(pkg.vehicles.length!==before){pkg.travelEnabled=pkg.vehicles.length>0;pkg.travelSystems=pkg.vehicles.map(v=>v.type);pkg.updatedAt=new Date().toISOString();changed=true;}}if(changed)saveJsonArray(packagesFile,packages);} const ns=loadJsonArray(notificationsFile); ns.unshift({id:crypto.randomUUID(),recipientEmail:guide.email,type:"vehicle_verification",message:`Your ${vehicle.customType||vehicle.type} vehicle ${vehicle.vehicleNumber} is now ${status}.${vehicle.verificationReason?` Reason: ${vehicle.verificationReason}`:""}`,read:false,createdAt:new Date().toISOString()}); saveJsonArray(notificationsFile,ns); res.json({vehicle}); });
 app.patch("/api/admin/guides/:email/status", requireAdmin, (req,res)=>{
   const email=normalizedEmail(req.params.email), user=users.get(email); if(!user||user.role!=="guide")return res.status(404).json({message:"Local Guide not found."});
   const allowed=["Pending","Under Review","Verified","Rejected","Changes Required","Suspended"]; const status=String(req.body?.status||""); if(!allowed.includes(status))return res.status(400).json({message:"Invalid guide verification status."});
