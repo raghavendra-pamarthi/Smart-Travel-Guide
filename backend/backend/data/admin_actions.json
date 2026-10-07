@@ -1,0 +1,87 @@
+[
+  {
+    "id": "7dfe34e3-07a5-40c5-9b11-67af5ba1d4b1",
+    "createdAt": "2026-10-07T03:17:42.146Z",
+    "type": "place_submission",
+    "title": "New place submitted",
+    "description": "Agra was submitted by bhargavi."
+  },
+  {
+    "id": "9f51c967-4000-4985-8ff0-395da88d3d84",
+    "createdAt": "2026-10-07T03:13:48.140Z",
+    "type": "guide_verification",
+    "title": "Guide verified",
+    "description": "bhargavi is now Verified.",
+    "targetEmail": "sai@gmail.com"
+  },
+  {
+    "id": "07076b4b-aa33-41ee-870f-bbc7bee7087d",
+    "createdAt": "2026-10-07T03:13:10.497Z",
+    "type": "guide_verification",
+    "title": "Guide changes required",
+    "description": "bhargavi is now Changes Required.",
+    "targetEmail": "sai@gmail.com"
+  },
+  {
+    "id": "5db0e4d5-9a91-4d96-931e-eb7b96957907",
+    "createdAt": "2026-10-07T03:12:16.018Z",
+    "type": "place_submission",
+    "title": "New place submitted",
+    "description": "AGRA was submitted by bhargavi."
+  },
+  {
+    "id": "5a220860-568c-4ce7-b899-789864973f50",
+    "createdAt": "2026-10-07T03:09:44.444Z",
+    "type": "guide_verification",
+    "title": "Guide verified",
+    "description": "raghava is now Verified.",
+    "targetEmail": "raghavapamarthi07@gmail.com"
+  },
+  {
+    "id": "20d6c3c0-28e6-47de-ad07-9443d3229bb8",
+    "createdAt": "2026-10-07T03:09:15.543Z",
+    "type": "guide_verification",
+    "title": "Guide rejected",
+    "description": "bhargavi is now Rejected.",
+    "targetEmail": "sai@gmail.com"
+  },
+  {
+    "id": "33d06d72-5f89-474f-aa4d-4261b5581767",
+    "createdAt": "2026-10-07T03:09:03.873Z",
+    "type": "place_verification",
+    "title": "Place rejected",
+    "description": "Place d9dd045c-cd0b-4d60-9ae2-15ffef15c25b is now Rejected.",
+    "targetId": "d9dd045c-cd0b-4d60-9ae2-15ffef15c25b"
+  },
+  {
+    "id": "5769b6ba-0b65-48b4-8ac8-2f9084af010f",
+    "createdAt": "2026-10-07T03:04:02.826Z",
+    "type": "place_submission",
+    "title": "New place submitted",
+    "description": "vijayawada was submitted by bhargavi."
+  },
+  {
+    "id": "6ce077d2-4b9b-4635-b87a-42cdbd25c0f9",
+    "createdAt": "2026-10-07T03:00:56.418Z",
+    "type": "guide_registration",
+    "title": "New Local Guide verification request",
+    "description": "bhargavi submitted Local Guide verification details.",
+    "targetEmail": "sai@gmail.com"
+  },
+  {
+    "id": "d8bee2ba-f9c6-42d9-8f0a-5fc2474c80a6",
+    "createdAt": "2026-10-01T10:13:45.619Z",
+    "type": "guide_verification",
+    "title": "Guide verified",
+    "description": "raghava is now Verified.",
+    "targetEmail": "raghavapamarthi07@gmail.com"
+  },
+  {
+    "id": "c662c785-b48d-4b59-85fe-a3100b00e0be",
+    "createdAt": "2026-10-01T09:35:04.116Z",
+    "type": "guide_registration",
+    "title": "New Local Guide verification request",
+    "description": "raghava submitted Local Guide verification details.",
+    "targetEmail": "raghavapamarthi07@gmail.com"
+  }
+]
